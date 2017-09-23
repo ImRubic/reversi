@@ -1,0 +1,49 @@
+/* reversi.css */
+#game-board {
+  border: 1px solid black;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 816px;
+  height: 816px;
+}
+
+#score-board {
+  border: 1px solid black;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 306px;
+  height: 61px;
+  background-color: darkgreen;
+  font: arial;
+  size: 15px;
+}
+
+
+.square {
+  border: 1px solid black;
+  width: 100px;
+  height: 100px;
+  background-color: forestgreen;
+}
+
+.discs {
+  width: 90px;
+  height: 90px;
+  margin: 5px;
+  border-radius: 50%;
+  /*box-shadow: 8px 8px 8px gray;*/
+}
+
+.discs-w {
+  background-color: ivory;
+}
+
+.discs-b {
+  background-color: black;
+}
+
+.square.highlight {
+  background-color: yellow;
+}
