@@ -17,27 +17,19 @@ var state = {
 /** @function getLegalMoves
   * returns a list of legal moves for the specified
   * piece to make.
-  * @param {String} piece - 'b' or 'w' for black or white pawns,
-  *    'bk' or 'wk' for white or black kings.
-  * @param {integer} x - the x position of the piece on the board
-  * @param {integer} y - the y position of the piece on the board
-  * @returns {Array} the legal moves as an array of objects.
   */
   function getLegalMoves(piece) {
-    //TODO: Change
     var opp;
     if(piece == 'b') opp = 'w';
     else opp = 'b';
 
     for(var y = 0; y < state.board.length; y++){
       for(var x = 0; x < state.board[y].length; x++){
-          if(state.board[y][x] == piece) {
-            checkMove(x, y, piece, opp);
-          }
+        if(state.board[y][x] == piece) {
+          checkMove(x, y, piece, opp);
+        }
       }
     }
-
-
   }
 
   /** @function checkMove
@@ -45,64 +37,42 @@ var state = {
     * @param {object} move - the move to apply.
     */
   function checkMove(x, y, piece, opp) {
+    //Checks to see if the spot being checked is on the board.
+    //Checks 8 directions.
+    var max = state.board.length;
+    var min = -1;
 
-    if(x < 8 && x > -1 && y-1 < 8 && y-1 > -1 && state.board[y-1][x] == opp) {
-      var a = -1;
-      var b = 0;
-      checkR(x, y, a, b, piece, opp);
+    for(var i = 1; i > -2; i--) {
+      for(var j = 1; j > -2; j--) {
+        if(x+i < max && x+i > min && y+j < max && y+j > min && state.board[y+j][x+i] == opp) {
+          checkR(x, y, j, i, piece, opp);
+        }
+      }
     }
-    if(x < 8 && x > -1 && y+1 < 8 && y+1 > -1 && state.board[y+1][x] == opp) {
-      var a = 1;
-      var b = 0;
-      checkR(x, y, a, b, piece, opp);
-    }
-    if(x+1 < 8 && x+1 > -1 && y < 8 && y > -1 && state.board[y][x+1] == opp) {
-      var a = 0;
-      var b = 1;
-      checkR(x, y, a, b, piece, opp);
-    }
-    if(x-1 < 8 && x-1 > -1 && y < 8 && y > -1 && state.board[y][x-1] == opp) {
-      var a = 0;
-      var b = -1;
-      checkR(x, y, a, b, piece, opp);
-    }
-    if(x+1 < 8 && x+1 > -1 && y-1 < 8 && y-1 > -1 && state.board[y-1][x+1] == opp) {
-      var a = -1;
-      var b = 1;
-      checkR(x, y, a, b, piece, opp);
-    }
-    if(x-1 < 8 && x-1 > -1 && y-1 < 8 && y-1 > -1 && state.board[y-1][x-1] == opp) {
-      var a = -1;
-      var b = -1;
-      checkR(x, y, a, b, piece, opp);
-    }
-    if(x+1 < 8 && x+1 > -1 && y+1 < 8 && y+1 > -1 && state.board[y+1][x+1] == opp) {
-      var a = 1;
-      var b = 1;
-      checkR(x, y, a, b, piece, opp);
-    }
-    if(x-1 < 8 && x-1 > -1 && y+1 < 8 && y+1 > -1 && state.board[y+1][x-1] == opp) {
-      var a = 1;
-      var b = -1;
-      checkR(x, y, a, b, piece, opp);
-    }
+
   }
 
   function checkR(x, y, a, b, piece, opp) {
-    if((x+b) < 8 && (x+b) > -1 && (y+a) < 8 && (y+a) > -1 && state.board[y+a][x+b] == opp) {
-      x = x+b;
-      y = y+a;
-
-      if (checkR(x, y, a, b, piece, opp) == 1) {
+    var max = state.board.length;
+    var min = -1;
+    //Checks to see if the next piece needs changing.
+    if(x+b < max && x+b > min && y+a < max && y+a > min && state.board[y+a][x+b] == opp) {
+      if (checkR(x+b, y+a, a, b, piece, opp) == 1) {
         return 1;
       }
     }
-    else if((x+b) < 8 && (x+b) > -1 && (y+a) < 8 && (y+a) > -1 && state.board[y+a][x+b] == null) {
+    //Checks to see if the next piece is the final piece
+    else if(x+b < max && x+b > min && y+a < max && y+a > min && state.board[y+a][x+b] == null) {
+      //Highlight Square
       var square = document.getElementById('square-' + (x+b) + '-' + (y+a));
-      square.classList.add('highlight');
-      square.onclick = handleHighlightClick;
-      state.captures['h']++;
-      return 1;
+      //Check to see if it's already highlighted
+      if(square.classList.value !== 'square highlight') {
+        square.classList.add('highlight');
+        square.onclick = handleHighlightClick;
+        state.captures['h']++;
+        return 1;
+      }
+
     }
     return 0;
   }
@@ -112,50 +82,19 @@ var state = {
   * @param {object} move - the move to apply.
   */
 function applyMove(x, y, piece) {
-  // TODO: Apply the move
   var opp;
   if(piece == 'b') opp = 'w';
   else opp = 'b';
 
-  if(x < 8 && x > -1 && y-1 < 8 && y-1 > -1 && state.board[y-1][x] == opp) {
-    var a = -1;
-    var b = 0;
-    applyR(x, y, a, b, piece, opp);
-  }
-  if(x < 8 && x > -1 && y+1 < 8 && y+1 > -1 && state.board[y+1][x] == opp) {
-    var a = 1;
-    var b = 0;
-    applyR(x, y, a, b, piece, opp);
-  }
-  if(x+1 < 8 && x+1 > -1 && y < 8 && y > -1 && state.board[y][x+1] == opp) {
-    var a = 0;
-    var b = 1;
-    applyR(x, y, a, b, piece, opp);
-  }
-  if(x-1 < 8 && x-1 > -1 && y < 8 && y > -1 && state.board[y][x-1] == opp) {
-    var a = 0;
-    var b = -1;
-    applyR(x, y, a, b, piece, opp);
-  }
-  if(x+1 < 8 && x+1 > -1 && y-1 < 8 && y-1 > -1 && state.board[y-1][x+1] == opp) {
-    var a = -1;
-    var b = 1;
-    applyR(x, y, a, b, piece, opp);
-  }
-  if(x-1 < 8 && x-1 > -1 && y-1 < 8 && y-1 > -1 && state.board[y-1][x-1] == opp) {
-    var a = -1;
-    var b = -1;
-    applyR(x, y, a, b, piece, opp);
-  }
-  if(x+1 < 8 && x+1 > -1 && y+1 < 8 && y+1 > -1 && state.board[y+1][x+1] == opp) {
-    var a = 1;
-    var b = 1;
-    applyR(x, y, a, b, piece, opp);
-  }
-  if(x-1 < 8 && x-1 > -1 && y+1 < 8 && y+1 > -1 && state.board[y+1][x-1] == opp) {
-    var a = 1;
-    var b = -1;
-    applyR(x, y, a, b, piece, opp);
+  var max = state.board.length;
+  var min = -1;
+
+  for(var i = 1; i > -2; i--) {
+    for(var j = 1; j > -2; j--) {
+      if(x+i < max && x+i > min && y+j < max && y+j > min && state.board[y+j][x+i] == opp) {
+        applyR(x, y, j, i, piece, opp);
+      }
+    }
   }
 
   state.board[y][x] = piece;
@@ -170,13 +109,19 @@ function applyMove(x, y, piece) {
 }
 
 function applyR(x, y, a, b, piece, opp) {
-  if((x+b) < 8 && (x+b) > -1 && (y+a) < 8 && (y+a) > -1 && state.board[y+a][x+b] == opp) {
-    x = x+b;
-    y = y+a;
+  var max = state.board.length;
+  var min = -1;
 
+  //Checks if the next piece in the direction provided by a & b needs to be changed.
+  if(x+b < max && x+b > min && y+a < max && y+a > min && state.board[y+a][x+b] == opp) {
+    x += b;
+    y += a;
+    //Recursively calls function until all pieces are changed.
     if (applyR(x, y, a, b, piece, opp) == 1) {
+      //Changes piece type
       state.board[y][x] = piece;
 
+      //Changes piece information
       var square = document.getElementById("square-" + x + "-" + y);
       var elem = document.getElementById("discs-" + x + "-" + y);
       if (elem !== null) elem.parentNode.removeChild(elem);
@@ -191,8 +136,8 @@ function applyR(x, y, a, b, piece, opp) {
       return 1;
     }
   }
-  else if((x+b) < 8 && (x+b) > -1 && (y+a) < 8 && (y+a) > -1 && state.board[y+a][x+b] == piece) {
-    if(state.board[y][x] == piece) return 0;
+  //Checks if the next piece in the direction is the final piece
+  else if(x+b < max && x+b > min && y+a < max && y+a > min && state.board[y+a][x+b] == piece) {
     return 1;
   }
   return 0;
@@ -200,6 +145,7 @@ function applyR(x, y, a, b, piece, opp) {
 
 
 function checkForVictory() {
+  //If no more pieces can be played or a piece's turn can't continue, game ends.
   if(state.captures['g'] == 0 || state.captures['h'] == 0) {
     score = document.getElementById('score-board');
     score.style.color = "Yellow";
@@ -226,10 +172,9 @@ function nextTurn() {
     score.textContent = "White's Turn";
   }
   else {
-    state.turn = 'b';
+  state.turn = 'b';
   score.textContent = "Black's Turn";
-}
-  //TODO: Add cases where one player can't play.
+  }
 }
 
 /** @function clearHighlights
@@ -265,13 +210,13 @@ function handleHighlightClick(event) {
   var y = parseInt(id.charAt(9));
   var piece = state.turn;
 
-  // TODO: Call function that recursively calls 8 directions
   // Returns bool value to confirm changing discs.
   applyMove(x, y, piece);
 
   // Clear old highlights
   clearHighlights();
-  //TODO: Change turn, check Victory, and check LegalMoves of opp.
+
+  //Chanegs turns
   nextTurn();
   // Get legal moves
   getLegalMoves(state.turn);
@@ -284,17 +229,20 @@ function handleHighlightClick(event) {
   * Sets up the game environment
   */
 function setup() {
+  //Create board
   var board = document.createElement('section');
   board.id = 'game-board';
   document.body.appendChild(board);
+
+  //Create tiles/squares on board.
   for(var y = 0; y < state.board.length; y++){
     for(var x = 0; x < state.board[y].length; x++){
       var square = document.createElement('div');
       square.id = "square-" + x + "-" + y;
       square.classList.add('square');
-      //TODO: Click highlight squre.
-      //square.onclick = handleHighlightClick;
       board.appendChild(square);
+
+      //Places the 4 initial pieces on the board.
       if(state.board[y][x]) {
         var discs = document.createElement('div');
         discs.id = "discs-" + x + "-" + y;
@@ -302,14 +250,18 @@ function setup() {
         discs.classList.add('discs-' + state.board[y][x]);
         square.appendChild(discs);
       }
+
     }
   }
+
+  //Creates Scoreboard
   var score = document.createElement('section');
   score.id = 'score-board';
   document.body.appendChild(score);
   score.textContent = "Black's Turn";
   score.style.fontSize = "40px";
 
+  //Checks the initial legal moves.
   getLegalMoves(state.turn);
 }
 
