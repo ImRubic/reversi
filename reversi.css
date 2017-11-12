@@ -9,17 +9,40 @@
 }
 
 #score-board {
+  position: relative;
   border: 1px solid black;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: 306px;
+  width: 816px;
   height: 61px;
   background-color: darkgreen;
-  font: arial;
-  size: 15px;
 }
 
+.turn-text {
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  font: arial;
+  font-size: 30px;
+}
+
+.score-b {
+  position: absolute;
+  text-align: left;
+  top: 30px;
+  left: 5px;
+  width: 100%;
+  font: arial;
+  font-size: 25px;
+}
+
+.score-w {
+  position: absolute;
+  text-align: right;
+  top: 30px;
+  right: 5px;
+  width: 100%;
+  font: arial;
+  font-size: 25px;
+}
 
 .square {
   border: 1px solid black;
@@ -44,6 +67,10 @@
   background-color: black;
 }
 
-.square.highlight {
+.highlight-b {
+  background-color: orange;
+}
+
+.highlight-w {
   background-color: yellow;
 }

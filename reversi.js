@@ -15,8 +15,7 @@ var state = {
 }
 
 /** @function getLegalMoves
-  * returns a list of legal moves for the specified
-  * piece to make.
+  * Cycles through the entire board to see if any moves can be made with the player's piece.
   */
   function getLegalMoves(piece) {
     var opp;
@@ -33,8 +32,7 @@ var state = {
   }
 
   /** @function checkMove
-    * A function to apply the selected move to the game
-    * @param {object} move - the move to apply.
+    * Checks all 8 directions of the piece if a move can be made.
     */
   function checkMove(x, y, piece, opp) {
     //Checks to see if the spot being checked is on the board.
@@ -52,6 +50,10 @@ var state = {
 
   }
 
+  /** @function checkR
+    * A recursive funciton that determines how many pieces in the given directions
+    * need to be changed.
+    */
   function checkR(x, y, a, b, piece, opp) {
     var max = state.board.length;
     var min = -1;
@@ -66,8 +68,10 @@ var state = {
       //Highlight Square
       var square = document.getElementById('square-' + (x+b) + '-' + (y+a));
       //Check to see if it's already highlighted
-      if(square.classList.value !== 'square highlight') {
+      if(square.classList[1] !== 'highlight') {
         square.classList.add('highlight');
+        if(state.turn === 'b') square.classList.add('highlight-b');
+        else square.classList.add('highlight-w');
         square.onclick = handleHighlightClick;
         state.captures['h']++;
         return 1;
@@ -78,8 +82,7 @@ var state = {
   }
 
 /** @function applyMove
-  * A function to apply the selected move to the game
-  * @param {object} move - the move to apply.
+  * Determines what direction the moves need to make and adds the player's peice.
   */
 function applyMove(x, y, piece) {
   var opp;
@@ -97,6 +100,7 @@ function applyMove(x, y, piece) {
     }
   }
 
+  //Adds a piece to the board
   state.board[y][x] = piece;
   var square = document.getElementById("square-" + x + "-" + y);
   var discs = document.createElement('div');
@@ -108,6 +112,10 @@ function applyMove(x, y, piece) {
   state.captures['g']--;
 }
 
+/** @function applyR
+  * Recursive funciton to determine how far in a given direction pieces need to change.
+  * Changes the pieces.
+  */
 function applyR(x, y, a, b, piece, opp) {
   var max = state.board.length;
   var min = -1;
@@ -123,13 +131,9 @@ function applyR(x, y, a, b, piece, opp) {
 
       //Changes piece information
       var square = document.getElementById("square-" + x + "-" + y);
-      var elem = document.getElementById("discs-" + x + "-" + y);
-      if (elem !== null) elem.parentNode.removeChild(elem);
-      var discs = document.createElement('div');
-      discs.id = "discs-" + x + "-" + y;
-      discs.classList.add('discs');
-      discs.classList.add('discs-' + state.board[y][x]);
-      square.appendChild(discs);
+      var discs = document.getElementById("discs-" + x + "-" + y);
+      discs.classList.remove('discs-' + opp);
+      discs.classList.add('discs-' + piece);
 
       state.captures[piece.substring(0,1)]++;
       state.captures[opp.substring(0,1)]--;
@@ -145,17 +149,21 @@ function applyR(x, y, a, b, piece, opp) {
 
 
 function checkForVictory() {
-  //If no more pieces can be played or a piece's turn can't continue, game ends.
-  if(state.captures['g'] == 0 || state.captures['h'] == 0) {
-    score = document.getElementById('score-board');
-    score.style.color = "Yellow";
+  var turn = document.getElementById('turn-text');
+  //If no more pieces can be played.
+  if(state.captures['g'] == 0) {
+    turn.style.color = "Yellow";
     state.over = true;
-    if(state.captures.b > state.captures.w) {
-      score.textContent = "Black Wins!";
-    }
-    else {
-      score.textContent = "White Wins!";
-    }
+    if(state.captures.b > state.captures.w) turn.textContent = "Black Wins!";
+    else turn.textContent = "White Wins!";
+    return "game over";
+  }
+  //If a player can no long play any more pieces.
+  else if(state.captures['h'] == 0) {
+    turn.style.color = "Yellow";
+    state.over = true;
+    if(state.turn === 'w') turn.textContent = "Black Wins!";
+    else turn.textContent = "White Wins!";
     return "game over";
   }
   return null;
@@ -166,14 +174,22 @@ function checkForVictory() {
   * turn property of state.
   */
 function nextTurn() {
-  score = document.getElementById('score-board');
+
+  //Changing Scoreboard elements
+  var turn = document.getElementById('turn-text');
+  var number = document.getElementById('score-b');
+  var number2 = document.getElementById('score-w');
+  number.textContent = "Black: " + state.captures.b;
+  number2.textContent = "White: " + state.captures.w;
+
+  //Changing Turn
   if(state.turn === 'b') {
     state.turn = 'w';
-    score.textContent = "White's Turn";
+    turn.textContent = "White's Turn";
   }
   else {
   state.turn = 'b';
-  score.textContent = "Black's Turn";
+  turn.textContent = "Black's Turn";
   }
 }
 
@@ -184,6 +200,8 @@ function clearHighlights() {
   var highlighted = document.querySelectorAll('.highlight');
   highlighted.forEach(function(square){
     square.classList.remove('highlight');
+    if(state.turn === 'b') square.classList.remove('highlight-b');
+    else square.classList.remove('highlight-w');
     state.captures['h']--;
   });
 }
@@ -229,6 +247,33 @@ function handleHighlightClick(event) {
   * Sets up the game environment
   */
 function setup() {
+
+  //Creates Scoreboard
+  var score = document.createElement('section');
+  score.id = 'score-board';
+  document.body.appendChild(score);
+
+  var turn = document.createElement('div');
+  turn.id = 'turn-text';
+  turn.classList.add('turn-text');
+  turn.textContent = "Black's Turn";
+  score.appendChild(turn);
+
+  var number = document.createElement('div');
+  number.id = 'score-b';
+  number.classList.add('score-b');
+  document.body.appendChild(score);
+  number.textContent = "Black: " + state.captures.b;
+  score.appendChild(number);
+
+  var number2 = document.createElement('div');
+  number2.id = 'score-w';
+  number2.classList.add('score-w');
+  document.body.appendChild(score);
+  number2.textContent = "White: " + state.captures.w;
+  score.appendChild(number2);
+
+
   //Create board
   var board = document.createElement('section');
   board.id = 'game-board';
@@ -254,12 +299,6 @@ function setup() {
     }
   }
 
-  //Creates Scoreboard
-  var score = document.createElement('section');
-  score.id = 'score-board';
-  document.body.appendChild(score);
-  score.textContent = "Black's Turn";
-  score.style.fontSize = "40px";
 
   //Checks the initial legal moves.
   getLegalMoves(state.turn);
